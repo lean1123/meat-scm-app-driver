@@ -1,188 +1,95 @@
-import { ShipmentResponse, ShipmentStatus } from '@/src/types/shipment';
+import { ShipmentResponse, ShipmentStatus } from '../types/shipment';
 
-export const trips = [
+export const shipments: ShipmentResponse[] = [
   {
-    id: '1',
-    name: 'John Doe',
-    address: '6391 Elgin St. Celina, Delaware 10299',
-    product: 'Product - 02',
-    price: '$52.01',
-    distance: '14 mi',
-    wo: 'WO# 04-1209',
-  },
-  {
-    id: '2',
-    name: 'John Doe',
-    address: '6391 Elgin St. Celina, Delaware 10299',
-    product: 'Product - 02',
-    price: '$52.01',
-    distance: '14 mi',
-    wo: 'WO# 04-1209',
-  },
-  {
-    id: '3',
-    name: 'John Doe',
-    address: '6391 Elgin St. Celina, Delaware 10299',
-    product: 'Product - 02',
-    price: '$52.01',
-    distance: '14 mi',
-    wo: 'WO# 04-1209',
-  },
-];
-
-export const shipments = [
-  {
-    id: 'SHIP-001',
-    shipmentName: 'Chở gia súc nông trại X',
-    createdBy: 'admin-user',
-    shipmentType: 'LIVE_ANIMALS',
-    deliveryAddress: '123 Đường Nông Trại, Quận 1, TP.HCM',
-    isDelivered: false,
-    shipmentStatus: ShipmentStatus.PENDING,
-    stops: [
-      {
-        facilityId: 'FARM-01',
-        action: 'PICKUP',
-        items: [
-          {
-            assetID: 'FARM-BATCH-010',
-            quantity: { unit: 'con', value: 15 },
-            images: [
-              'https://example.com/images/pickup-batch-010-1.jpg',
-              'https://example.com/images/pickup-batch-010-2.jpg',
-            ],
-          },
-        ],
-        isVerified: true,
-      },
-      {
-        facilityId: 'MARKET-01',
-        action: 'DELIVERY',
-        items: [
-          {
-            assetID: 'FARM-BATCH-010',
-            quantity: { unit: 'con', value: 15 },
-            images: [],
-          },
-        ],
-        isVerified: false,
-      },
-    ],
-  },
-  {
-    id: 'SHIP-002',
-    shipmentName: 'Giao thịt đông lạnh kho 02',
-    createdBy: 'dispatcher-user',
-    shipmentType: 'FROZEN_MEAT',
-    deliveryAddress: '123 Đường Nông Trại, Quận 1, TP.HCM',
-    isDelivered: false,
-    shipmentStatus: ShipmentStatus.PENDING,
-    stops: [
-      {
-        facilityId: 'WAREHOUSE-02',
-        action: 'PICKUP',
-        items: [
-          {
-            assetID: 'MEAT-BATCH-021',
-            quantity: { unit: 'kg', value: 200 },
-            images: ['https://example.com/images/pickup-batch-021-1.jpg'],
-          },
-        ],
-        isVerified: true,
-      },
-      {
-        facilityId: 'SUPERMARKET-05',
-        action: 'DELIVERY',
-        items: [
-          {
-            assetID: 'MEAT-BATCH-021',
-            quantity: { unit: 'kg', value: 200 },
-            images: ['https://example.com/images/delivery-batch-021-1.jpg'],
-          },
-        ],
-        isVerified: true,
-      },
-    ],
-  },
-];
-
-export const shippedItems: ShipmentResponse[] = [
-  {
-    id: 'SHIP-001',
-    shipmentName: 'Chở gia súc nông trại X',
-    createdBy: 'admin-user',
-    shipmentType: 'LIVE_ANIMALS',
-    driverEnrollmentID: 'worker-f05b3dfd',
+    docType: 'ShipmentAsset',
+    shipmentID: 'SHIP-LIVE-ANIMAL-01',
+    shipmentType: 'LIVE_ANIMAL',
+    driverEnrollmentID: 'driver-213da980',
     driverName: 'Tài xế A',
     vehiclePlate: '51A-11111',
-    deliveryAddress: '123 Đường Nông Trại, Quận 1, TP.HCM',
-    isDelivered: true,
-    shipmentStatus: ShipmentStatus.DELIVERIED,
+    status: ShipmentStatus.COMPLETED,
     stops: [
       {
-        facilityId: 'FARM-01',
+        facilityID: 'farm-a',
+        facilityName: 'Nông trại sạch A',
+        facilityAddress: {
+          fullText: 'Ngã tư Vũng Tàu, Quốc lộ 51, Phường An Hòa, TP. Biên Hòa, Đồng Nai',
+          latitude: 10.936,
+          longitude: 106.8735,
+        },
         action: 'PICKUP',
+        status: ShipmentStatus.COMPLETED,
         items: [
           {
-            assetID: 'FARM-BATCH-010',
-            quantity: { unit: 'con', value: 15 },
-            images: [
-              'https://example.com/images/pickup-batch-010-1.jpg',
-              'https://example.com/images/pickup-batch-010-2.jpg',
-            ],
+            assetID: 'FARM-BATCH-101',
+            quantity: {
+              unit: 'con',
+              value: 20,
+            },
           },
         ],
-        isVerified: true,
       },
       {
-        facilityId: 'MARKET-01',
+        facilityID: 'processor-b',
+        facilityName: 'Nhà máy chế biến B',
+        facilityAddress: {
+          fullText: 'Khu công nghiệp Amata, Long Bình, TP. Biên Hòa, Đồng Nai',
+          latitude: 10.9446,
+          longitude: 106.8902,
+        },
         action: 'DELIVERY',
+        status: ShipmentStatus.COMPLETED,
         items: [
           {
-            assetID: 'FARM-BATCH-010',
-            quantity: { unit: 'con', value: 15 },
-            images: [],
+            assetID: 'FARM-BATCH-101',
+            quantity: {
+              unit: 'con',
+              value: 20,
+            },
           },
         ],
-        isVerified: false,
       },
     ],
-  },
-  {
-    id: 'SHIP-002',
-    shipmentName: 'Giao thịt đông lạnh kho 02',
-    createdBy: 'dispatcher-user',
-    shipmentType: 'FROZEN_MEAT',
-    driverEnrollmentID: 'worker-f05b3dfd',
-    driverName: 'Tài xế A',
-    vehiclePlate: '51A-11111',
-    deliveryAddress: '123 Đường Nông Trại, Quận 1, TP.HCM',
-    isDelivered: true,
-    shipmentStatus: ShipmentStatus.DELIVERIED,
-    stops: [
+    timeline: [
       {
-        facilityId: 'WAREHOUSE-02',
-        action: 'PICKUP',
-        items: [
-          {
-            assetID: 'MEAT-BATCH-021',
-            quantity: { unit: 'kg', value: 200 },
-            images: ['https://example.com/images/pickup-batch-021-1.jpg'],
-          },
-        ],
-        isVerified: true,
+        type: 'pickup_confirmed',
+        timestamp: '2025-09-02T06:56:47Z',
+        location: 'Ngã tư Vũng Tàu, Quốc lộ 51, Phường An Hòa, TP. Biên Hòa, Đồng Nai',
+        proof: {
+          photoHash: 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2',
+          photoURL: 'https://your-s3-bucket.s3.amazonaws.com/proofs/SHP-TEST-001-farm-a.jpg',
+          uploadedBy: 'driver-213da980',
+        },
+        facilityID: 'farm-a',
       },
       {
-        facilityId: 'SUPERMARKET-05',
-        action: 'DELIVERY',
-        items: [
-          {
-            assetID: 'MEAT-BATCH-021',
-            quantity: { unit: 'kg', value: 200 },
-            images: ['https://example.com/images/delivery-batch-021-1.jpg'],
-          },
-        ],
-        isVerified: true,
+        type: 'departure',
+        timestamp: '2025-09-02T06:58:08Z',
+        location: 'Ngã tư Vũng Tàu, Quốc lộ 51, Phường An Hòa, TP. Biên Hòa, Đồng Nai',
+        proof: {},
+        facilityID: 'farm-a',
+      },
+      {
+        type: 'arrival',
+        timestamp: '2025-09-02T06:58:56Z',
+        location: 'Khu công nghiệp Amata, Long Bình, TP. Biên Hòa, Đồng Nai',
+        proof: {
+          photoHash: 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3dee5f6a1b2c3dfdfe5f6a1b2',
+          photoURL: 'https://your-s3-bucket.s3.amazonaws.com/proofs/SHP-TEST-003-farm-a.jpg',
+          uploadedBy: 'driver-213da980',
+        },
+        facilityID: 'processor-b',
+      },
+    ],
+    history: [
+      {
+        type: 'SHIPMENT_CREATED',
+        actorMSP: 'MeatSupplyOrgMSP',
+        actorID: 'driver-213da980',
+        timestamp: '2025-09-02T06:53:47Z',
+        txID: '1814f9141aafd3910162b1db99d55eb024a9706acc06ca5961b3a0808c0d4ef3',
+        details: 'Shipment created and pending.',
       },
     ],
   },

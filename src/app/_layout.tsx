@@ -3,8 +3,9 @@ import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import 'react-native-reanimated';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
 import { AuthProvider, useAuth } from '../context/AuthContext';
 import { store } from '../store/store';
@@ -35,9 +36,8 @@ const InitialLayout = () => {
         router.replace('/(tabs)');
       }
     }
-  }, [userToken, isLoading, loaded, segments]);
+  }, [userToken, isLoading, loaded, segments, router]);
 
-  // Hiển thị màn hình chờ trong khi auth hoặc font đang được tải
   if (isLoading || !loaded) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -46,28 +46,29 @@ const InitialLayout = () => {
     );
   }
 
-  // Khi đã sẵn sàng, hiển thị Stack Navigator của bạn
   return (
-    <ThemeProvider value={DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-        <Stack.Screen
-          name="confirmation"
-          options={{
-            title: 'Xác nhận giao hàng',
-          }}
-        />
-        {/* Thêm các màn hình công khai ở đây để chúng không bị ẩn */}
-        <Stack.Screen name="login" options={{ headerShown: false }} />
-        <Stack.Screen name="register" options={{ headerShown: false }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.container} edges={['top', 'bottom', 'left', 'right']}>
+        <ThemeProvider value={DefaultTheme}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="+not-found" />
+            <Stack.Screen
+              name="confirmation"
+              options={{
+                title: 'Xác nhận giao hàng',
+              }}
+            />
+            <Stack.Screen name="login" options={{ headerShown: false }} />
+            <Stack.Screen name="register" options={{ headerShown: false }} />
+          </Stack>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 };
 
-// Component RootLayout gốc giờ đây chỉ làm nhiệm vụ cung cấp Context
 export default function RootLayout() {
   return (
     <Provider store={store}>
@@ -77,3 +78,15 @@ export default function RootLayout() {
     </Provider>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});

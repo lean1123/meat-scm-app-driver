@@ -1,43 +1,67 @@
-// Định nghĩa kiểu cho số lượng
-type Quantity = {
-  unit: string; // đơn vị đo (vd: "con", "kg")
-  value: number; // giá trị số
+export type Quantity = {
+  unit: string;
+  value: number;
 };
 
-// Định nghĩa kiểu cho Item trong mỗi stop
-type ShipmentItem = {
-  assetID: string; // mã tài sản/lô hàng
-  quantity: Quantity; // số lượng
-  images: string[]; // danh sách URL hình ảnh
+export type ShipmentItem = {
+  assetID: string;
+  quantity: Quantity;
 };
 
-// Định nghĩa kiểu cho Stop
-type ShipmentStop = {
-  facilityId: string; // mã cơ sở (nông trại, chợ, kho,...)
-  action: 'PICKUP' | 'DELIVERY'; // hành động (nhận hoặc giao)
-  items: ShipmentItem[]; // danh sách items
-  isVerified: boolean; // đã xác thực hay chưa
+export type FacilityAddress = {
+  fullText: string;
+  latitude: number;
+  longitude: number;
+};
+
+export type ShipmentStop = {
+  facilityID: string;
+  facilityName: string;
+  facilityAddress: FacilityAddress;
+  action: 'PICKUP' | 'DELIVERY';
+  status: ShipmentStatus;
+  items: ShipmentItem[];
+};
+
+export type Proof = {
+  photoHash?: string;
+  photoURL?: string;
+  uploadedBy?: string;
+};
+
+export type TimelineEvent = {
+  type: 'pickup_confirmed' | 'departure' | 'arrival' | string;
+  timestamp: string;
+  location: string;
+  proof: Proof;
+  facilityID?: string;
+};
+
+export type HistoryRecord = {
+  type: string;
+  actorMSP: string;
+  actorID: string;
+  timestamp: string;
+  txID: string;
+  details: string;
 };
 
 export enum ShipmentStatus {
   PENDING = 'PENDING',
-  DELIVERIED = 'DELIVERED',
-  CANCELLED = 'CANCELLED',
+  COMPLETED = 'COMPLETED',
   DELIVERING = 'DELIVERING',
+  CANCELLED = 'CANCELLED',
 }
 
-// Định nghĩa kiểu cho toàn bộ Shipment
-type ShipmentResponse = {
-  id: string; // mã đơn hàng
-  shipmentName: string; // tên chuyến hàng
-  createdBy: string; // người tạo
-  shipmentType: string; // loại hàng (vd: LIVE_ANIMALS)
-  driverEnrollmentID?: string; // ID tài xế trong hệ thống
-  driverName?: string; // tên tài xế
-  vehiclePlate?: string; // biển số xe
-  deliveryAddress: string; // địa chỉ giao
-  isDelivered: boolean; // trạng thái đã giao chưa
-  shipmentStatus: ShipmentStatus; // trạng thái đơn hàng
-  stops: ShipmentStop[]; // danh sách điểm dừng
+export type ShipmentResponse = {
+  docType: 'ShipmentAsset';
+  shipmentID: string;
+  shipmentType: string;
+  driverEnrollmentID?: string;
+  driverName?: string;
+  vehiclePlate?: string;
+  status: ShipmentStatus;
+  stops: ShipmentStop[];
+  timeline?: TimelineEvent[];
+  history?: HistoryRecord[];
 };
-export type { Quantity, ShipmentItem, ShipmentResponse, ShipmentStop };

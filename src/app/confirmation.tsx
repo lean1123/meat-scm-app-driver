@@ -14,7 +14,7 @@ export default function ConfirmationScreen() {
 
   useEffect(() => {
     const fetchShipment = (id: string) => {
-      const shipment = shipments.find((item) => item.id === id);
+      const shipment = shipments.find((item) => item.shipmentID === id);
       if (shipment) {
         setShipmentData(shipment as ShipmentResponse);
       }
@@ -27,7 +27,7 @@ export default function ConfirmationScreen() {
     if (!shipmentData) return;
 
     const newStops = shipmentData.stops.map((s) =>
-      s.facilityId === updatedStop.facilityId && s.action === updatedStop.action ? updatedStop : s,
+      s.facilityID === updatedStop.facilityID && s.action === updatedStop.action ? updatedStop : s,
     );
 
     setShipmentData({
@@ -37,7 +37,9 @@ export default function ConfirmationScreen() {
   };
 
   const handleConfirm = () => {
-    const isAllStopsVerified = shipmentData?.stops.every((stop) => stop.isVerified);
+    const isAllStopsVerified = shipmentData?.stops.every(
+      (stop) => stop.status === ShipmentStatus.COMPLETED,
+    );
 
     if (!isAllStopsVerified) {
       alert('Vui lòng xác nhận tất cả các điểm giao hàng trước khi hoàn tất đơn hàng.');
@@ -45,10 +47,9 @@ export default function ConfirmationScreen() {
     }
 
     if (shipmentData) {
-      const matchedShipment = shipments.find((item) => item.id === shipmentData.id);
+      const matchedShipment = shipments.find((item) => item.shipmentID === shipmentData.shipmentID);
       if (matchedShipment) {
-        matchedShipment.isDelivered = true;
-        matchedShipment.shipmentStatus = ShipmentStatus.DELIVERIED;
+        matchedShipment.status = ShipmentStatus.COMPLETED;
       }
     }
     alert('Cảm ơn bạn đã xác nhận đơn hàng!');
@@ -63,7 +64,7 @@ export default function ConfirmationScreen() {
           <DeliveryList deliveries={shipmentData?.stops} onUpdateStop={handleUpdateStop} />
 
           <TouchableOpacity
-            className="w-full bg-orange-500 p-5 rounded-2xl"
+            className="w-full bg-orange-500 p-5 rounded-2xl mt-4"
             onPress={handleConfirm}
           >
             <Text className="text-white font-bold text-center text-base">Confirm</Text>

@@ -1,4 +1,5 @@
-import { ShipmentStop } from '@/src/types/shipment';
+import { ShipmentStatus, ShipmentStop } from '@/src/types/shipment';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import React, { useCallback, useRef } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
@@ -30,16 +31,23 @@ export default function DeliveryStop({ stop, onUpdateStop }: DeliveryStopProps) 
     bottomSheetModalRef.current?.close();
   };
 
-  const hasImages = stop.items.some((item) => item.images && item.images.length > 0);
-
+  const hasImages = true;
   return (
     <View className="bg-white rounded-2xl shadow p-4 mb-3">
-      <Text className="font-bold text-base mb-1">Cơ sở: {stop.facilityId}</Text>
+      <Text className="font-bold text-base mb-1">Cơ sở: {stop.facilityID}</Text>
       <Text className="text-xs text-gray-500 mb-2">Hành động: {stop.action}</Text>
       <Text
-        className={`text-sm font-bold ${stop.isVerified ? 'text-green-600' : 'text-orange-500'}`}
+        className={`text-sm font-bold ${stop.status === ShipmentStatus.COMPLETED ? 'text-green-600' : 'text-orange-500'}`}
       >
-        {stop.isVerified ? '✅ Đã xác nhận' : '⏳ Chờ xác nhận'}
+        {stop.status === ShipmentStatus.COMPLETED ? (
+          <Text>
+            <AntDesign name="checkcircleo" size={16} color="green" /> Đã xác nhận
+          </Text>
+        ) : (
+          <Text>
+            <AntDesign name="clockcircleo" size={16} color="orange" /> Chờ xác nhận
+          </Text>
+        )}
       </Text>
       {stop.items.map((item, i) => (
         <View key={i} className="my-2 p-2 rounded-xl bg-gray-50 border border-gray-200">
@@ -47,16 +55,16 @@ export default function DeliveryStop({ stop, onUpdateStop }: DeliveryStopProps) 
         </View>
       ))}
 
-      {!stop.isVerified && (
+      {stop.status !== ShipmentStatus.COMPLETED && (
         <View className="mt-2 pt-3 border-t border-gray-200">
           {!hasImages && (
             <>
               <Text className="text-sm text-gray-600 mb-2">Bước 1: Tải ảnh xác nhận lô hàng.</Text>
               <TouchableOpacity
-                className="bg-blue-500 rounded-lg p-3 items-center"
+                className="bg-orange-500 rounded-lg p-3 items-center"
                 onPress={handlePresentModalPress}
               >
-                <Text className="text-white font-bold text-sm">Tải ảnh lên</Text>
+                <Text className="text-white font-bold text-sm">Chụp ảnh để xác nhận</Text>
               </TouchableOpacity>
             </>
           )}

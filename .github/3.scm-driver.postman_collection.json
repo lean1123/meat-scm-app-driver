@@ -1,0 +1,474 @@
+{
+	"info": {
+		"_postman_id": "97e8a64e-2f38-4664-8515-2e3c89416b8d",
+		"name": "3.scm-driver",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "22271556",
+		"_collection_link": "https://grey-comet-310492.postman.co/workspace/fresh-meat-scm~fcc4944b-0cc5-49ef-93c3-2bf5238594fd/collection/33820367-97e8a64e-2f38-4664-8515-2e3c89416b8d?action=share&source=collection_link&creator=22271556"
+	},
+	"item": [
+		{
+			"name": "driver A",
+			"item": [
+				{
+					"name": "auth",
+					"item": [
+						{
+							"name": "login driver",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Parse response\r",
+											"let json = pm.response.json();\r",
+											"\r",
+											"// Kiểm tra có token không\r",
+											"if (json.token) {\r",
+											"    pm.environment.set(\"jwt-driver\", json.token);\r",
+											"}\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"driver.a@carrier.com\",\r\n    \"password\": \"123456\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/v1/auth/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"login"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "business",
+					"item": [
+						{
+							"name": "3.driver accepted shipment",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt-driver}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"shipmentID\": \"SHIP-LIVE-ANIMAL-01\",\r\n    \"shipmentType\": \"LIVE_ANIMAL\",\r\n    \"driverName\": \"Tài xế A\",\r\n    \"vehiclePlate\": \"51A-11111\",\r\n    \"stops\": [\r\n        {\r\n            \"facilityID\": \"farm-a\",\r\n            \"action\": \"PICKUP\",\r\n            \"items\": [ { \"assetID\": \"FARM-BATCH-101\", \"quantity\": { \"unit\": \"con\", \"value\": 20 } } ]\r\n        },\r\n        {\r\n            \"facilityID\": \"processor-b\",\r\n            \"action\": \"DELIVERY\",\r\n            \"items\": [ { \"assetID\": \"FARM-BATCH-101\", \"quantity\": { \"unit\": \"con\", \"value\": 20 } } ]\r\n        }\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/v1/shipments",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"v1",
+										"shipments"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "4.upload pickup proof",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt-driver}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"photoURL\": \"https://your-s3-bucket.s3.amazonaws.com/proofs/SHP-TEST-001-farm-a.jpg\",\r\n    \"photoHash\": \"a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/v1/shipments/SHIP-LIVE-ANIMAL-01/stops/farm-a/pickup-photo",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"v1",
+										"shipments",
+										"SHIP-LIVE-ANIMAL-01",
+										"stops",
+										"farm-a",
+										"pickup-photo"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "6.start delivery",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt-driver}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/v1/shipments/SHIP-LIVE-ANIMAL-01/start",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"v1",
+										"shipments",
+										"SHIP-LIVE-ANIMAL-01",
+										"start"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "7.upload delivery proof",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt-driver}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"photoURL\": \"https://your-s3-bucket.s3.amazonaws.com/proofs/SHP-TEST-003-farm-a.jpg\",\r\n    \"photoHash\": \"a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3dee5f6a1b2c3dfdfe5f6a1b2\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/v1/shipments/SHIP-LIVE-ANIMAL-01/stops/processor-b/delivery-photo",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"v1",
+										"shipments",
+										"SHIP-LIVE-ANIMAL-01",
+										"stops",
+										"processor-b",
+										"delivery-photo"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "10.driver accepted shipment processor to warehouse/retail",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt-driver}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"shipmentID\": \"SHIP-COLD-CHAIN-02\",\r\n    \"shipmentType\": \"REFRIGERATED_FOOD\",\r\n    \"driverName\": \"Tài xế A\",\r\n    \"vehiclePlate\": \"51A-11111\",\r\n    \"stops\": [\r\n        {\r\n            \"facilityID\": \"processor-b\",\r\n            \"action\": \"PICKUP\",\r\n            \"items\": [ { \"assetID\": \"PROD-TB-101\", \"quantity\": { \"unit\": \"khay\", \"value\": 150 } } ]\r\n        },\r\n        {\r\n            \"facilityID\": \"warehouse-c\",\r\n            \"action\": \"DELIVERY\",\r\n            \"items\": [ { \"assetID\": \"PROD-TB-101\", \"quantity\": { \"unit\": \"khay\", \"value\": 100 } } ]\r\n        },\r\n        {\r\n            \"facilityID\": \"retailer-d\",\r\n            \"action\": \"DELIVERY\",\r\n            \"items\": [ { \"assetID\": \"PROD-TB-101\", \"quantity\": { \"unit\": \"khay\", \"value\": 50 } } ]\r\n        }\r\n    ]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/v1/shipments",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"v1",
+										"shipments"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "11.upload pickup proof",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt-driver}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"photoURL\": \"https://your-s3-bucket.s3.amazonaws.com/proofs/SHP-TEST-001-farm-a.jpg\",\r\n    \"photoHash\": \"a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/v1/shipments/SHIP-COLD-CHAIN-02/stops/processor-b/pickup-photo",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"v1",
+										"shipments",
+										"SHIP-COLD-CHAIN-02",
+										"stops",
+										"processor-b",
+										"pickup-photo"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "13.driver start delivery",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt-driver}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/v1/shipments/SHIP-COLD-CHAIN-02/start",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"v1",
+										"shipments",
+										"SHIP-COLD-CHAIN-02",
+										"start"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "14.upload delivery proof warehouse",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt-driver}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"photoURL\": \"https://your-s3-bucket.s3.amazonaws.com/proofs/SHP-TEST-001-farm-a.jpg\",\r\n    \"photoHash\": \"a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/v1/shipments/SHIP-COLD-CHAIN-02/stops/warehouse-c/delivery-photo",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"v1",
+										"shipments",
+										"SHIP-COLD-CHAIN-02",
+										"stops",
+										"warehouse-c",
+										"delivery-photo"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "17.upload delivery proof retailer",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt-driver}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"photoURL\": \"https://your-s3-bucket.s3.amazonaws.com/proofs/SHP-TEST-001-farm-a.jpg\",\r\n    \"photoHash\": \"a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/api/v1/shipments/SHIP-COLD-CHAIN-02/stops/retailer-d/delivery-photo",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"v1",
+										"shipments",
+										"SHIP-COLD-CHAIN-02",
+										"stops",
+										"retailer-d",
+										"delivery-photo"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get shipments info",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt-driver}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/api/v1/shipments/SHIP-LIVE-ANIMAL-01",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"api",
+										"v1",
+										"shipments",
+										"SHIP-LIVE-ANIMAL-01"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	]
+}
