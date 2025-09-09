@@ -1,4 +1,5 @@
-import { uploadToCloudinary } from '@/src/services/uploadService';
+import { uploadProofThunk } from '@/src/hooks/useSelectorShipment';
+import { AppDispatch } from '@/src/store/store';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useState } from 'react';
@@ -11,19 +12,29 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useDispatch } from 'react-redux';
 
 type Props = {
   onImagesChange?: (images: string[]) => void;
   onSend: (images: string[]) => void;
+  shipmentID?: string;
+  facilityID?: string;
+  step?: 'pickup' | 'delivery';
 };
 
-const UploadImageComponent: React.FC<Props> = ({ onImagesChange, onSend }: Props) => {
+const UploadImageComponent: React.FC<Props> = ({
+  onImagesChange,
+  onSend,
+  facilityID,
+  step,
+  shipmentID,
+}: Props) => {
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
   const [confirmModal, setConfirmModal] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
 
-  // Hàm chụp ảnh
   const pickImage = async () => {
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -47,8 +58,25 @@ const UploadImageComponent: React.FC<Props> = ({ onImagesChange, onSend }: Props
       const uploadedLinks: string[] = [];
 
       for (let uri of images) {
-        const cloudUrl = await uploadToCloudinary(uri);
-        uploadedLinks.push(cloudUrl);
+        const formData = new FormData();
+        formData.append('photo', {
+          uri,
+          name: 'photo.jpg',
+          type: 'image/jpeg',
+        } as any);
+        if (shipmentID && facilityID && step) {
+          const cloudUrl = await dispatch(
+            uploadProofThunk({
+              step,
+              shipmentID: shipmentID || '',
+              facilityID: facilityID || '',
+              formData,
+            }),
+          ).unwrap();
+          uploadedLinks.push(cloudUrl);
+        } else {
+          throw new Error('Missing shipmentID, facilityID, or step in UploadImageComponent');
+        }
       }
 
       setConfirmModal(false);
@@ -63,7 +91,6 @@ const UploadImageComponent: React.FC<Props> = ({ onImagesChange, onSend }: Props
 
   return (
     <View style={{ padding: 16 }}>
-      {/* Danh sách ảnh */}
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center' }}>
         {[...images.slice(0, 3), ...(images.length > 3 ? [null] : [])].map((uri, index) =>
           uri ? (
@@ -144,7 +171,6 @@ const UploadImageComponent: React.FC<Props> = ({ onImagesChange, onSend }: Props
         </View>
       </Modal>
 
-      {/* Modal xem toàn bộ ảnh */}
       <Modal visible={isModalVisible} animationType="slide">
         <View style={{ flex: 1, backgroundColor: '#000' }}>
           <FlatList

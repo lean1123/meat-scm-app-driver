@@ -1,8 +1,7 @@
-// src/context/AuthContext.tsx
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
-// Định nghĩa kiểu
 interface AuthContextType {
   login: (token: string) => void;
   logout: () => void;
@@ -33,11 +32,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (token: string) => {
     setUserToken(token);
     await SecureStore.setItemAsync('userToken', token);
+    await AsyncStorage.setItem('userToken', token);
   };
 
   const logout = async () => {
     setUserToken(null);
     await SecureStore.deleteItemAsync('userToken');
+    await AsyncStorage.removeItem('userToken');
   };
 
   return (
@@ -47,7 +48,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Custom hook để sử dụng context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {

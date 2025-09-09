@@ -21,8 +21,8 @@ const LoginScreen = () => {
   const { login } = useAuth();
   const dispatch = useDispatch<AppDispatch>();
   const { status, error, token } = useSelector((state: RootState) => state.auth);
-  const [email, setEmail] = useState('test@user.com');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('driver.a@carrier.com');
+  const [password, setPassword] = useState('123456');
 
   const handleLogin = () => {
     if (!email || !password) {

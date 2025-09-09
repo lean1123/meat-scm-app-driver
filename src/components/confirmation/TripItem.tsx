@@ -1,20 +1,12 @@
 import { shipments } from '@/src/data/Home';
-import { ShipmentStatus } from '@/src/types/shipment';
+import { ShipmentResponse, ShipmentStatus } from '@/src/types/shipment';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { Modal, Text, TouchableOpacity, View } from 'react-native';
 import { getStatusRendering } from './helperFunc/statusRendering';
 
 interface TripItemProps {
-  item: {
-    id: string;
-    shipmentName: string;
-    createdBy: string;
-    shipmentType: string;
-    deliveryAddress: string;
-    isDelivered: boolean;
-    shipmentStatus: ShipmentStatus;
-  };
+  item: ShipmentResponse;
   index: number;
 }
 
@@ -23,12 +15,12 @@ export default function TripItem({ item, index }: TripItemProps) {
   const [modalVisible, setModalVisible] = React.useState(false);
 
   const ongoingShipment = shipments.find(
-    (shipment) => shipment.shipmentStatus === ShipmentStatus.DELIVERING,
+    (shipment) => shipment.status === ShipmentStatus.DELIVERING,
   );
 
-  const isDeliveringShipment = ongoingShipment?.id === item.id;
+  // const isDeliveringShipment = ongoingShipment?.shipmentID === item.shipmentID;
+  const isDeliveringShipment = true;
 
-  // Ham kiem tra xem co the nhan don moi khong ?
   const validateAcceptNewShipment = () => {
     if (isDeliveringShipment) {
       return true;
@@ -38,8 +30,8 @@ export default function TripItem({ item, index }: TripItemProps) {
   };
 
   const handleClickNewShipment = () => {
-    if (isDeliveringShipment || item.shipmentStatus === ShipmentStatus.DELIVERIED) {
-      router.push({ pathname: '/confirmation', params: { id: item.id } });
+    if (isDeliveringShipment || item.status === ShipmentStatus.COMPLETED) {
+      router.push({ pathname: '/confirmation', params: { id: item.shipmentID } });
       return;
     }
 
@@ -50,32 +42,31 @@ export default function TripItem({ item, index }: TripItemProps) {
     }
   };
 
-  // Xử lý khi xác nhận nhận đơn
   const handleAcceptShipment = () => {
     setModalVisible(false);
-    shipments.filter((item) => item.id === item.id)[0].shipmentStatus = ShipmentStatus.DELIVERING;
-    router.push({ pathname: '/confirmation', params: { id: item.id } });
+    shipments.filter((item) => item.shipmentID === item.shipmentID)[0].status =
+      ShipmentStatus.DELIVERING;
+    router.push({ pathname: '/confirmation', params: { id: item.shipmentID } });
   };
 
   return (
     <>
       <TouchableOpacity
-        className="bg-white rounded-2xl p-4 mb-4 shadow"
+        className="bg-orange-50 rounded-2xl p-4 mb-4 shadow-xl"
         onPress={handleClickNewShipment}
       >
-        <Text className="text-xs text-gray-400 mb-1">ID: {item.id}</Text>
-        <Text className="text-base font-semibold text-dark mb-1">{item.shipmentName}</Text>
-        <Text className="text-xs text-gray-500 mb-1">Người tạo: {item.createdBy}</Text>
-        <Text className="text-xs text-gray-500 mb-1">Loại: {item.shipmentType}</Text>
-        <Text className="text-xs text-gray-500 mb-1">Địa chỉ giao: {item.deliveryAddress}</Text>
+        <Text className="text-xs text-black mb-1 font-semibold">ID: {item.shipmentID}</Text>
+        <Text className="text-xs text-black mb-1 font-semibold">Loại: {item.shipmentType}</Text>
         <View className="flex-row justify-between items-center mt-3">
           <Text
             className={'text-sm font-bold'}
-            style={{ color: getStatusRendering(item.shipmentStatus)?.color }}
+            style={{ color: getStatusRendering(item.status)?.color }}
           >
-            {getStatusRendering(item.shipmentStatus)?.label}
+            {getStatusRendering(item.status)?.label}
           </Text>
-          <Text className="text-xs text-gray-400">#{String(index + 1).padStart(2, '0')}</Text>
+          <Text className="text-xs text-black font-semibold">
+            #{String(index + 1).padStart(2, '0')}
+          </Text>
         </View>
       </TouchableOpacity>
       <View>

@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from '../hooks/useAuth';
+import shipmentReducer from '../hooks/useSelectorShipment';
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
+    selectedShipment: shipmentReducer,
   },
 });
 

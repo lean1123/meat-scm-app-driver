@@ -8,7 +8,7 @@ export const shipments: ShipmentResponse[] = [
     driverEnrollmentID: 'driver-213da980',
     driverName: 'Tài xế A',
     vehiclePlate: '51A-11111',
-    status: ShipmentStatus.COMPLETED,
+    status: ShipmentStatus.PENDING,
     stops: [
       {
         facilityID: 'farm-a',
@@ -19,7 +19,7 @@ export const shipments: ShipmentResponse[] = [
           longitude: 106.8735,
         },
         action: 'PICKUP',
-        status: ShipmentStatus.COMPLETED,
+        status: ShipmentStatus.PENDING,
         items: [
           {
             assetID: 'FARM-BATCH-101',
@@ -39,7 +39,7 @@ export const shipments: ShipmentResponse[] = [
           longitude: 106.8902,
         },
         action: 'DELIVERY',
-        status: ShipmentStatus.COMPLETED,
+        status: ShipmentStatus.PENDING,
         items: [
           {
             assetID: 'FARM-BATCH-101',
@@ -52,35 +52,35 @@ export const shipments: ShipmentResponse[] = [
       },
     ],
     timeline: [
-      {
-        type: 'pickup_confirmed',
-        timestamp: '2025-09-02T06:56:47Z',
-        location: 'Ngã tư Vũng Tàu, Quốc lộ 51, Phường An Hòa, TP. Biên Hòa, Đồng Nai',
-        proof: {
-          photoHash: 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2',
-          photoURL: 'https://your-s3-bucket.s3.amazonaws.com/proofs/SHP-TEST-001-farm-a.jpg',
-          uploadedBy: 'driver-213da980',
-        },
-        facilityID: 'farm-a',
-      },
-      {
-        type: 'departure',
-        timestamp: '2025-09-02T06:58:08Z',
-        location: 'Ngã tư Vũng Tàu, Quốc lộ 51, Phường An Hòa, TP. Biên Hòa, Đồng Nai',
-        proof: {},
-        facilityID: 'farm-a',
-      },
-      {
-        type: 'arrival',
-        timestamp: '2025-09-02T06:58:56Z',
-        location: 'Khu công nghiệp Amata, Long Bình, TP. Biên Hòa, Đồng Nai',
-        proof: {
-          photoHash: 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3dee5f6a1b2c3dfdfe5f6a1b2',
-          photoURL: 'https://your-s3-bucket.s3.amazonaws.com/proofs/SHP-TEST-003-farm-a.jpg',
-          uploadedBy: 'driver-213da980',
-        },
-        facilityID: 'processor-b',
-      },
+      // {
+      //   type: 'pickup_confirmed',
+      //   timestamp: '2025-09-02T06:56:47Z',
+      //   location: 'Ngã tư Vũng Tàu, Quốc lộ 51, Phường An Hòa, TP. Biên Hòa, Đồng Nai',
+      //   proof: {
+      //     photoHash: 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2',
+      //     photoURL: 'https://your-s3-bucket.s3.amazonaws.com/proofs/SHP-TEST-001-farm-a.jpg',
+      //     uploadedBy: 'driver-213da980',
+      //   },
+      //   facilityID: 'farm-a',
+      // },
+      // {
+      //   type: 'departure',
+      //   timestamp: '2025-09-02T06:58:08Z',
+      //   location: 'Ngã tư Vũng Tàu, Quốc lộ 51, Phường An Hòa, TP. Biên Hòa, Đồng Nai',
+      //   proof: {},
+      //   facilityID: 'farm-a',
+      // },
+      // {
+      //   type: 'arrival',
+      //   timestamp: '2025-09-02T06:58:56Z',
+      //   location: 'Khu công nghiệp Amata, Long Bình, TP. Biên Hòa, Đồng Nai',
+      //   proof: {
+      //     photoHash: 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3dee5f6a1b2c3dfdfe5f6a1b2',
+      //     photoURL: 'https://your-s3-bucket.s3.amazonaws.com/proofs/SHP-TEST-003-farm-a.jpg',
+      //     uploadedBy: 'driver-213da980',
+      //   },
+      //   facilityID: 'processor-b',
+      // },
     ],
     history: [
       {

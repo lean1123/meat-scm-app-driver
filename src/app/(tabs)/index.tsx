@@ -1,11 +1,27 @@
-import { shipments } from '@/src/data/Home';
-import { useState } from 'react';
+import { getShipmentByDriverId } from '@/src/api/driverApi';
+import { ShipmentResponse } from '@/src/types/shipment';
+import { useEffect, useState } from 'react';
 import { FlatList, Image, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
 import '../../../global.css';
 import TripItem from '../../components/confirmation/TripItem';
 
 export default function HomeScreen() {
   const [tab, setTab] = useState('Đang cần giao');
+  const [shipments, setShipments] = useState<ShipmentResponse[]>([]);
+
+  useEffect(() => {
+    const fetchShipmentsByDriverId = async () => {
+      try {
+        const res = await getShipmentByDriverId('driver-62b7e8d1');
+        setShipments(res);
+      } catch (error) {
+        console.error('Error fetching shipments:', error);
+      }
+    };
+
+    fetchShipmentsByDriverId();
+  }, []);
+
   return (
     <SafeAreaView className="flex-1 items-center bg-white">
       <View className="w-full h-36 bg-orange-500 top-0 rounded-b-2xl shadow-md">
@@ -29,7 +45,7 @@ export default function HomeScreen() {
       </View>
       <FlatList
         data={shipments}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.shipmentID}
         contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         className="w-full"
         renderItem={({ item, index }) => <TripItem item={item} index={index} />}

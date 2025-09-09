@@ -13,7 +13,7 @@ export const statusRenderings = [
     id: 2,
   },
   {
-    status: 'DELIVERED',
+    status: 'COMPLETED',
     label: 'Đã giao hàng',
     color: '#32CD32', // Màu xanh lá
     id: 3,

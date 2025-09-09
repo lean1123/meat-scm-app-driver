@@ -34,6 +34,7 @@ export type TimelineEvent = {
   timestamp: string;
   location: string;
   proof: Proof;
+  photoURL?: string;
   facilityID?: string;
 };
 
