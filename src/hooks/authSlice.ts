@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import * as SecureStore from 'expo-secure-store';
 import { AuthApi } from '../api/authApi';
+import { AppDispatch } from '../store/store';
 
 interface User {
   id: string;
@@ -36,16 +37,20 @@ export const loginUser = createAsyncThunk(
   },
 );
 
+export const logout = () => async (dispatch: AppDispatch) => {
+  await SecureStore.deleteItemAsync('userToken');
+  dispatch(clearAuth());
+};
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    logout: (state) => {
+    clearAuth: (state) => {
       state.user = null;
       state.token = null;
       state.status = 'idle';
       state.error = null;
-      SecureStore.deleteItemAsync('userToken');
     },
   },
 
@@ -70,5 +75,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { clearAuth } = authSlice.actions;
 export default authSlice.reducer;

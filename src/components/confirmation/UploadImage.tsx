@@ -1,8 +1,9 @@
-import { uploadProofThunk } from '@/src/hooks/useSelectorShipment';
 import { AppDispatch } from '@/src/store/store';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useState } from 'react';
+import { uploadProofThunk } from '../../hooks/useSelectorShipment';
+
 import {
   ActivityIndicator,
   FlatList,
@@ -59,6 +60,7 @@ const UploadImageComponent: React.FC<Props> = ({
 
       for (let uri of images) {
         const formData = new FormData();
+        const tempId = Date.now().toString();
         formData.append('photo', {
           uri,
           name: 'photo.jpg',
@@ -71,6 +73,7 @@ const UploadImageComponent: React.FC<Props> = ({
               shipmentID: shipmentID || '',
               facilityID: facilityID || '',
               formData,
+              tempId,
             }),
           ).unwrap();
           uploadedLinks.push(cloudUrl);

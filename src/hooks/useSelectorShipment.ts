@@ -1,9 +1,12 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { useSelector } from 'react-redux';
 import { getShipmentInfo, uploadDeliveryProof, uploadPickupProof } from '../api/driverApi';
+import { RootState } from '../store/store';
 import { ShipmentResponse } from '../types/shipment';
 
 interface SelectedShipmentState {
   selectedShipment: ShipmentResponse | null;
+  localShipmentChanges: Partial<ShipmentResponse> | null;
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
   uploadStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
@@ -12,6 +15,7 @@ interface SelectedShipmentState {
 
 const initialState: SelectedShipmentState = {
   selectedShipment: null,
+  localShipmentChanges: null,
   status: 'idle',
   error: null,
   uploadStatus: 'idle',
@@ -39,12 +43,11 @@ export const uploadProofThunk = createAsyncThunk(
       shipmentID: string;
       facilityID: string;
       formData: any;
+      tempId: string;
     },
     { rejectWithValue, dispatch },
   ) => {
     try {
-      console.log('Uploading proof with payload:', payload);
-
       let data;
       if (payload.step === 'pickup') {
         data = await uploadPickupProof(payload.shipmentID, payload.facilityID, payload.formData);
@@ -52,9 +55,10 @@ export const uploadProofThunk = createAsyncThunk(
         data = await uploadDeliveryProof(payload.shipmentID, payload.facilityID, payload.formData);
       }
 
-      // data.facilityID = payload.facilityID;
-      // data.shipmentID = payload.shipmentID;
-      // data.type = payload.step === 'pickup' ? 'pickup_confirmed' : 'arrival';
+      data.facilityID = payload.facilityID;
+      data.shipmentID = payload.shipmentID;
+      data.type = payload.step === 'pickup' ? 'pickup_confirmed' : 'arrival';
+      data.tempId = payload.tempId;
 
       return data;
     } catch (error: any) {
@@ -63,6 +67,21 @@ export const uploadProofThunk = createAsyncThunk(
     }
   },
 );
+
+export const useSelectedShipment = () => {
+  return useSelector((state: RootState) => {
+    const { selectedShipment, localShipmentChanges } = state.selectedShipment;
+
+    if (!selectedShipment) return null;
+    console.log('Local Timeline Change: ', localShipmentChanges?.timeline);
+
+    return {
+      ...selectedShipment,
+      ...localShipmentChanges,
+      timeline: [...(selectedShipment.timeline || []), ...(localShipmentChanges?.timeline || [])],
+    };
+  });
+};
 
 const shipmentSlice = createSlice({
   name: 'selectedShipment',
@@ -87,12 +106,52 @@ const shipmentSlice = createSlice({
         state.uploadStatus = 'loading';
         state.uploadError = null;
       })
+      // .addCase(uploadProofThunk.fulfilled, (state, action) => {
+      //   // state.uploadStatus = 'succeeded';
+      //   // if (state.selectedShipment?.timeline) {
+      //   //   state.selectedShipment.timeline = [...state.selectedShipment.timeline, action.payload];
+      //   // }
+      //   // if (state.localShipmentChanges) {
+      //   //   state.localShipmentChanges = state.selectedShipment;
+      //   // }
+
+      //   state.uploadStatus = 'succeeded';
+
+      //   const confirmedProof = action.payload;
+
+      //   if (state.localShipmentChanges?.timeline) {
+      //     state.localShipmentChanges.timeline = state.localShipmentChanges.timeline.filter(
+      //       (item) => item.tempId !== confirmedProof.tempId,
+      //     );
+      //   }
+
+      //   if (state.selectedShipment?.timeline) {
+      //     state.selectedShipment.timeline = [...state.selectedShipment.timeline, confirmedProof];
+      //   }
+      // })
       .addCase(uploadProofThunk.fulfilled, (state, action) => {
         state.uploadStatus = 'succeeded';
+        const confirmedProof = action.payload;
+        if (!state.localShipmentChanges) {
+          state.localShipmentChanges = {};
+        }
+        if (!state.localShipmentChanges.timeline) {
+          state.localShipmentChanges.timeline = [];
+          state.localShipmentChanges.timeline.push(confirmedProof);
+        }
+
         if (state.selectedShipment?.timeline) {
-          state.selectedShipment.timeline = [...state.selectedShipment.timeline, action.payload];
+          state.selectedShipment.timeline = [...state.selectedShipment.timeline, confirmedProof];
+        }
+
+        if (state.localShipmentChanges?.timeline) {
+          state.localShipmentChanges.timeline = [
+            ...state.localShipmentChanges.timeline,
+            confirmedProof,
+          ];
         }
       })
+
       .addCase(uploadProofThunk.rejected, (state, action) => {
         state.uploadStatus = 'failed';
         state.uploadError = action.payload as string;

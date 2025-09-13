@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
-import authReducer from '../hooks/useAuth';
+import authReducer from '../hooks/authSlice';
 import shipmentReducer from '../hooks/useSelectorShipment';
 
 export const store = configureStore({

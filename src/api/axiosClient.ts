@@ -3,8 +3,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import Constants from 'expo-constants';
+import * as SecureStore from 'expo-secure-store';
 
-const API_URL = Constants.expoConfig?.extra?.apiUrl || 'https://d24d862502f8.ngrok-free.app/api/v1';
+const API_URL = Constants.expoConfig?.extra?.apiUrl || 'https://ab583d7b12c4.ngrok-free.app/api/v1';
 const PUBLIC_API_URL = [
   { urlPattern: /\/asserts(\/.*)?$/, methods: ['GET'] },
   { urlPattern: /\/auth\/login$/, methods: ['POST'] },
@@ -32,7 +33,7 @@ axiosClient.interceptors.request.use(
       return config;
     }
 
-    const token = await AsyncStorage.getItem('userToken');
+    const token = await SecureStore.getItem('userToken');
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

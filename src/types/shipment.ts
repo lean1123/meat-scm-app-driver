@@ -36,6 +36,7 @@ export type TimelineEvent = {
   proof: Proof;
   photoURL?: string;
   facilityID?: string;
+  tempId?: string; // Su dung cho local change trong Redux
 };
 
 export type HistoryRecord = {

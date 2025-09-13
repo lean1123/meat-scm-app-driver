@@ -11,7 +11,7 @@ type MenuItem = {
 };
 
 const ProfileScreen = () => {
-  const { userToken, logout } = useAuth();
+  const { userToken, handleLogoutFromContext } = useAuth();
   const userInfo = useMemo(() => {
     if (!userToken) return { name: 'Guest User', email: 'guest@example.com' };
     const email = userToken.split('-')[4] || 'Không có email';
@@ -36,7 +36,7 @@ const ProfileScreen = () => {
       {
         text: 'OK',
         onPress: () => {
-          logout();
+          handleLogoutFromContext();
         },
       },
     ]);

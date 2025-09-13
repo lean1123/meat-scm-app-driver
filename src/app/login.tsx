@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useAuth } from '../context/AuthContext'; // <-- Điều chỉnh đường dẫn nếu cần
-import { loginUser } from '../hooks/useAuth';
+import { loginUser } from '../hooks/authSlice';
 import { AppDispatch, RootState } from '../store/store';
 
 const LoginScreen = () => {
