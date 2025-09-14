@@ -12,7 +12,7 @@ export default function HomeScreen() {
   useEffect(() => {
     const fetchShipmentsByDriverId = async () => {
       try {
-        const res = await getShipmentByDriverId('driver-62b7e8d1');
+        const res = await getShipmentByDriverId('driver-7fcc3acd');
         setShipments(res);
       } catch (error) {
         console.error('Error fetching shipments:', error);

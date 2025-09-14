@@ -27,16 +27,20 @@ export type Proof = {
   photoHash?: string;
   photoURL?: string;
   uploadedBy?: string;
+  facilityID?: string;
 };
 
 export type TimelineEvent = {
-  type: 'pickup_confirmed' | 'departure' | 'arrival' | string;
+  type:
+    | 'pickup_confirmed'
+    | 'departure'
+    | 'arrival'
+    | 'pickup_proof_added'
+    | 'delivery_proof_added'
+    | string;
   timestamp: string;
   location: string;
   proof: Proof;
-  photoURL?: string;
-  facilityID?: string;
-  tempId?: string; // Su dung cho local change trong Redux
 };
 
 export type HistoryRecord = {

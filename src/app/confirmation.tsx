@@ -8,11 +8,11 @@ import { ScrollView, Text, TouchableOpacity } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useDispatch, useSelector } from 'react-redux';
 import DeliveryList from '../components/confirmation/delivery/DeliveryList';
-import { fetchShipmentById, useSelectedShipment } from '../hooks/useSelectorShipment';
+import { fetchShipmentById } from '../hooks/useSelectorShipment';
 import { AppDispatch, RootState } from '../store/store';
 
 export default function ConfirmationScreen() {
-  const selectedShipment = useSelectedShipment();
+  const { selectedShipment } = useSelector((state: RootState) => state.selectedShipment);
   const { id = 'SHIP-LIVE-ANIMAL-01' } = useLocalSearchParams();
   const dispatch = useDispatch<AppDispatch>();
   const status = useSelector((state: RootState) => state.selectedShipment.status);
