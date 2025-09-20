@@ -1,9 +1,9 @@
+import { API_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
-import Constants from 'expo-constants';
 import * as SecureStore from 'expo-secure-store';
 
-const API_URL = Constants.expoConfig?.extra?.apiUrl || 'https://cd003806ffae.ngrok-free.app/api/v1';
+const BASE_API_URL = API_URL || 'https://c300774879d3.ngrok-free.app/api/v1';
 const PUBLIC_API_URL = [
   { urlPattern: /\/asserts(\/.*)?$/, methods: ['GET'] },
   { urlPattern: /\/auth\/login$/, methods: ['POST'] },
@@ -11,7 +11,7 @@ const PUBLIC_API_URL = [
 ];
 
 const axiosClient: AxiosInstance = axios.create({
-  baseURL: API_URL,
+  baseURL: BASE_API_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

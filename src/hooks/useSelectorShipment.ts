@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { getShipmentInfo, uploadDeliveryProof, uploadPickupProof } from '../api/driverApi';
 import { RootState } from '../store/store';
-import { ShipmentResponse, TimelineEvent } from '../types/shipment';
+import { ShipmentResponse, ShipmentStatus, TimelineEvent } from '../types/shipment';
 
 interface SelectedShipmentState {
   selectedShipment: ShipmentResponse | null;
@@ -96,7 +96,17 @@ export const makeSelectStepByFacility = (facilityID: string) =>
 const shipmentSlice = createSlice({
   name: 'selectedShipment',
   initialState,
-  reducers: {},
+  reducers: {
+    stopCompleted: (state, action: PayloadAction<{ shipmentID: string; facilityID: string }>) => {
+      const { shipmentID, facilityID } = action.payload;
+      if (state.selectedShipment && state.selectedShipment.shipmentID === shipmentID) {
+        const stop = state.selectedShipment.stops.find((s) => s.facilityID === facilityID);
+        if (stop) {
+          stop.status = ShipmentStatus.COMPLETED;
+        }
+      }
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchShipmentById.pending, (state) => {

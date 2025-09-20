@@ -8,6 +8,7 @@ import 'react-native-reanimated';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
 import { AuthProvider, useAuth } from '../context/AuthContext';
+import { WebSocketProvider } from '../context/SocketProvider';
 import { store } from '../store/store';
 
 const InitialLayout = () => {
@@ -26,21 +27,23 @@ const InitialLayout = () => {
   useEffect(() => {
     if (isLoading || !loaded) return;
 
-    const inTabsGroup = segments[0] === '(tabs)';
+    const firstSegment = segments[0];
 
-    if (!userToken && inTabsGroup) {
-      router.replace('/login');
-    } else if (userToken && !inTabsGroup) {
+    if (!userToken) {
+      if (firstSegment === '(tabs)') {
+        router.replace('/login');
+      }
+    } else {
       const inAuthRoutes = segments.includes('login') || segments.includes('register');
       if (inAuthRoutes) {
         router.replace('/(tabs)');
       }
     }
-  }, [userToken, isLoading, loaded, segments, router]);
+  }, [userToken, segments, isLoading, loaded, router]);
 
   if (isLoading || !loaded) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={styles.loader}>
         <ActivityIndicator size="large" />
       </View>
     );
@@ -73,7 +76,9 @@ export default function RootLayout() {
   return (
     <Provider store={store}>
       <AuthProvider>
-        <InitialLayout />
+        <WebSocketProvider>
+          <InitialLayout />
+        </WebSocketProvider>
       </AuthProvider>
     </Provider>
   );
