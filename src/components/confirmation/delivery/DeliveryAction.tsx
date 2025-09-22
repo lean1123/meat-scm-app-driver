@@ -1,5 +1,5 @@
 import { makeSelectStepByFacility } from '@/src/hooks/useSelectorShipment';
-import { ShipmentStatus } from '@/src/types/shipment';
+import { ShipmentItem, ShipmentStatus } from '@/src/types/shipment';
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
@@ -9,11 +9,15 @@ const DeliveryActions = React.memo(function DeliveryActions({
   facilityID,
   shipmentID,
   stopStatus,
+  item,
+  action,
   onOpenUpload,
 }: {
   facilityID: string;
   shipmentID: string;
   stopStatus: ShipmentStatus;
+  item: ShipmentItem;
+  action: 'PICKUP' | 'DELIVERY';
   onOpenUpload: (step: 'pickup' | 'delivery') => void;
 }) {
   const step = useSelector(makeSelectStepByFacility(facilityID));
@@ -55,11 +59,11 @@ const DeliveryActions = React.memo(function DeliveryActions({
               value={JSON.stringify({
                 shipmentID,
                 facilityID,
-                action: 'PICKUP',
+                action,
                 items: [
                   {
-                    assetID: 'FARM-BATCH-101',
-                    quantity: { unit: 'con', value: 20 },
+                    assetID: item.assetID,
+                    quantity: item.quantity,
                   },
                 ],
               })}

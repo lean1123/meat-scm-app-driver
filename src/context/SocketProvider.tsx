@@ -2,7 +2,9 @@ import { EXPO_PUBLIC_WEBSOCKET_URL } from '@env';
 import React, { createContext, useCallback, useContext, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useDispatch } from 'react-redux';
+import ShipmentRequestNotification from '../components/common/ShipmentRequestNotification';
 import { shipmentActions } from '../hooks/useSelectorShipment';
+import { addRequest, removeRequest } from '../hooks/useShipmentRequestSlice';
 import { useWebSocket } from '../hooks/useSocket';
 import { AppDispatch } from '../store/store';
 import { useAuth } from './AuthContext';
@@ -28,17 +30,17 @@ const SocketConnectionManager = ({
 
   const handleOpen = useCallback(() => {
     setConnected(true);
-    showToast('🔌 Kết nối thành công');
+    showToast('Kết nối thành công');
   }, [setConnected, showToast]);
 
   const handleClose = useCallback(() => {
     setConnected(false);
-    showToast('❌ Đã ngắt kết nối');
+    showToast('Đã ngắt kết nối');
   }, [setConnected, showToast]);
 
   const handleError = useCallback(() => {
     setConnected(false);
-    showToast('⚠️ Lỗi kết nối');
+    showToast('Lỗi kết nối');
   }, [setConnected, showToast]);
 
   const handleMessage = useCallback(
@@ -48,6 +50,13 @@ const SocketConnectionManager = ({
           case 'delivery_confirmed':
             console.log('Received delivery_confirmed event:', data.payload);
             dispatch(shipmentActions.stopCompleted(data.payload));
+            break;
+          case 'new_transport_bid':
+            dispatch(addRequest(data.bid));
+            break;
+
+          case 'bid_confirmed_by_other':
+            dispatch(removeRequest({ bidID: data.bidID }));
             break;
           default:
             break;
@@ -109,6 +118,7 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
           <Text style={styles.toastText}>{toastMessage}</Text>
         </View>
       )}
+      <ShipmentRequestNotification />
     </WebSocketContext.Provider>
   );
 };

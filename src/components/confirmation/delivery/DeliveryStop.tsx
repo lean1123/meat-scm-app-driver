@@ -58,6 +58,8 @@ export default function DeliveryStop({ stop }: DeliveryStopProps) {
         facilityID={stop.facilityID}
         shipmentID={shipmentID}
         stopStatus={stop.status}
+        item={stop?.items[0]}
+        action={stop.action}
         onOpenUpload={handlePresentModalPress}
       />
 

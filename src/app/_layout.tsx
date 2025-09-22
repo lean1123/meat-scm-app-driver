@@ -64,6 +64,8 @@ const InitialLayout = () => {
             />
             <Stack.Screen name="login" options={{ headerShown: false }} />
             <Stack.Screen name="register" options={{ headerShown: false }} />
+            <Stack.Screen name="vehicle-management" options={{ title: 'Quản lý phương tiện' }} />
+            <Stack.Screen name="shipment-request/[id]" options={{ title: 'Chi tiết yêu cầu' }} />
           </Stack>
           <StatusBar style="auto" />
         </ThemeProvider>

@@ -1,17 +1,42 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Tabs, useRouter } from 'expo-router';
+import { RootState } from '@/src/store/store';
+import { Feather, Ionicons } from '@expo/vector-icons';
+import { Tabs } from 'expo-router';
 import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { useSelector } from 'react-redux';
+
+const TabBarIconWithBadge = ({
+  name,
+  color,
+  size,
+}: {
+  name: keyof typeof Feather.glyphMap;
+  color: string;
+  size: number;
+}) => {
+  const requestCount = useSelector((state: RootState) => state.shipmentRequest.requests.length);
+
+  return (
+    <View>
+      <Feather name={name} size={size} color={color} />
+      {requestCount > 0 && (
+        <View className="absolute -right-2 -top-1 bg-red-500 rounded-full w-4 h-4 justify-center items-center">
+          <Text className="text-white text-xs font-bold">{requestCount}</Text>
+        </View>
+      )}
+    </View>
+  );
+};
 
 export default function TabLayout() {
-  const router = useRouter();
+  // const router = useRouter();
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
-        tabBarStyle: styles.tabBar, // style object
+        tabBarStyle: styles.tabBar,
       }}
     >
       <Tabs.Screen
@@ -21,7 +46,7 @@ export default function TabLayout() {
         }}
       />
 
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="qrCode"
         options={{
           tabBarButton: () => (
@@ -30,6 +55,17 @@ export default function TabLayout() {
                 <Ionicons name="qr-code" size={28} color="white" />
               </TouchableOpacity>
             </View>
+          ),
+        }}
+      /> */}
+
+      <Tabs.Screen
+        name="request"
+        options={{
+          title: 'Yêu cầu',
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <TabBarIconWithBadge name="bell" color={'#fff'} size={size} />
           ),
         }}
       />

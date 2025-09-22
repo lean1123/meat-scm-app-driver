@@ -1,6 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { setupResponseInterceptor } from '../api/axiosClient';
 import { logout } from '../hooks/authSlice';
 import { AppDispatch } from '../store/store';
 
@@ -9,6 +10,7 @@ interface AuthContextType {
   handleLogoutFromContext: () => void;
   userToken: string | null;
   isLoading: boolean;
+  handleLogoutFromInvalidToken: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -43,8 +45,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await dispatch(logout());
   };
 
+  const handleLogoutFromInvalidToken = async () => {
+    setUserToken(null);
+    await SecureStore.deleteItemAsync('userToken');
+  };
+
+  useEffect(() => {
+    setupResponseInterceptor(handleLogoutFromInvalidToken);
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ login, handleLogoutFromContext, userToken, isLoading }}>
+    <AuthContext.Provider
+      value={{ login, handleLogoutFromContext, userToken, isLoading, handleLogoutFromInvalidToken }}
+    >
       {children}
     </AuthContext.Provider>
   );
