@@ -15,7 +15,7 @@ export default function DeliveryList({ deliveries, timeline }: DeliveryListProps
     <View className="mx-4 mt-4">
       <Text className="font-bold text-base mb-2">Delivery Requests ({deliveries?.length})</Text>
       {deliveries?.map((stop: ShipmentStop) => (
-        <DeliveryStop key={stop.facilityID} stop={stop} timeline={timeline} />
+        <DeliveryStop key={stop.facilityID} stop={stop} />
       ))}
     </View>
   );

@@ -55,7 +55,7 @@ export type HistoryRecord = {
 export enum ShipmentStatus {
   PENDING = 'PENDING',
   COMPLETED = 'COMPLETED',
-  DELIVERING = 'DELIVERING',
+  UPLOADING = 'UPLOADING',
   CANCELLED = 'CANCELLED',
 }
 

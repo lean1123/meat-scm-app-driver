@@ -12,7 +12,10 @@ import { fetchShipmentById } from '../hooks/useSelectorShipment';
 import { AppDispatch, RootState } from '../store/store';
 
 export default function ConfirmationScreen() {
-  const { selectedShipment } = useSelector((state: RootState) => state.selectedShipment);
+  const selectedShipment = useSelector(
+    (state: RootState) => state.selectedShipment.selectedShipment,
+  );
+
   const { id = 'SHIP-LIVE-ANIMAL-01' } = useLocalSearchParams();
   const dispatch = useDispatch<AppDispatch>();
   const status = useSelector((state: RootState) => state.selectedShipment.status);

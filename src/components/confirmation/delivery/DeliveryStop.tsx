@@ -1,5 +1,5 @@
 import { RootState } from '@/src/store/store';
-import { ShipmentStatus, ShipmentStop, TimelineEvent } from '@/src/types/shipment';
+import { ShipmentStatus, ShipmentStop } from '@/src/types/shipment';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import React, { useCallback, useRef, useState } from 'react';
@@ -10,7 +10,6 @@ import DeliveryActions from './DeliveryAction';
 
 interface DeliveryStopProps {
   stop: ShipmentStop;
-  timeline: TimelineEvent[];
 }
 
 interface DeliveryStopProps {
@@ -54,14 +53,15 @@ export default function DeliveryStop({ stop }: DeliveryStopProps) {
         )}
       </Text>
 
-      <DeliveryActions
-        facilityID={stop.facilityID}
-        shipmentID={shipmentID}
-        stopStatus={stop.status}
-        item={stop?.items[0]}
-        action={stop.action}
-        onOpenUpload={handlePresentModalPress}
-      />
+      {stop.status !== ShipmentStatus.COMPLETED && (
+        <DeliveryActions
+          facilityID={stop.facilityID}
+          shipmentID={shipmentID}
+          item={stop?.items[0]}
+          action={stop.action}
+          onOpenUpload={handlePresentModalPress}
+        />
+      )}
 
       <BottomSheetModal ref={bottomSheetModalRef} snapPoints={['60%']}>
         <BottomSheetView style={{ flex: 1, padding: 10 }}>

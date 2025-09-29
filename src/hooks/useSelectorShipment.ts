@@ -61,7 +61,7 @@ export const uploadProofThunk = createAsyncThunk(
           facilityID: payload.facilityID,
           photoHash: data.photoHash,
           photoURL: data.photoURL,
-          uploadedBy: 'driver-7fcc3acd', // có thể lấy từ state.auth.userID
+          uploadedBy: 'driver-7fcc3acd',
         },
       };
 
@@ -73,23 +73,22 @@ export const uploadProofThunk = createAsyncThunk(
   },
 );
 
-export const makeSelectTimelineByFacility = (facilityID: string) =>
+export const makeSelectStopByFacility = (facilityID: string) =>
   createSelector(
-    (state: RootState) => state.selectedShipment?.selectedShipment?.timeline || [],
-    (timeline) => timeline.filter((t) => t?.proof?.facilityID === facilityID),
+    (state: RootState) => state.selectedShipment?.selectedShipment?.stops || [],
+    (stops) => stops.find((t) => t?.facilityID === facilityID),
   );
 
 export const makeSelectStepByFacility = (facilityID: string) =>
-  createSelector(makeSelectTimelineByFacility(facilityID), (timeline) => {
-    const hasDelivery = timeline.some(
-      (t) => t.type === 'delivery_proof_added' || t.type === 'arrival',
-    );
-    const hasPickup = timeline.some(
-      (t) => t.type === 'pickup_proof_added' || t.type === 'pickup_confirmed',
-    );
-
-    if (hasDelivery) return 'completed';
-    if (hasPickup) return 'waiting_delivery';
+  createSelector(makeSelectStopByFacility(facilityID), (stop) => {
+    const pendingPickup = stop?.action === 'PICKUP' && stop?.status === ShipmentStatus.PENDING;
+    const pendingDelivery = stop?.action === 'DELIVERY' && stop?.status === ShipmentStatus.PENDING;
+    const hasDelivered = stop?.action === 'DELIVERY' && stop?.status === ShipmentStatus.UPLOADING;
+    const hasPickuped = stop?.action === 'PICKUP' && stop?.status === ShipmentStatus.UPLOADING;
+    if (pendingPickup) return 'waiting_pickup';
+    if (pendingDelivery) return 'waiting_delivery';
+    if (hasPickuped) return 'completed_pickup';
+    if (hasDelivered) return 'completed_delivery';
     return 'waiting_pickup';
   });
 
@@ -99,11 +98,18 @@ const shipmentSlice = createSlice({
   reducers: {
     stopCompleted: (state, action: PayloadAction<{ shipmentID: string; facilityID: string }>) => {
       const { shipmentID, facilityID } = action.payload;
+
       if (state.selectedShipment && state.selectedShipment.shipmentID === shipmentID) {
-        const stop = state.selectedShipment.stops.find((s) => s.facilityID === facilityID);
-        if (stop) {
-          stop.status = ShipmentStatus.COMPLETED;
-        }
+        const newStops = state.selectedShipment.stops.map((stop) => {
+          if (stop.facilityID === facilityID) {
+            return { ...stop, status: ShipmentStatus.COMPLETED };
+          }
+          return stop;
+        });
+        state.selectedShipment = {
+          ...state.selectedShipment,
+          stops: newStops,
+        };
       }
     },
   },
@@ -133,6 +139,20 @@ const shipmentSlice = createSlice({
         if (!state.selectedShipment.timeline) state.selectedShipment.timeline = [];
 
         state.selectedShipment.timeline = [...state.selectedShipment.timeline, confirmedProof];
+
+        const facilityID = confirmedProof.proof.facilityID;
+        if (!facilityID) return;
+
+        const newStops = state.selectedShipment.stops.map((stop) => {
+          if (stop.facilityID === facilityID) {
+            return { ...stop, status: ShipmentStatus.UPLOADING };
+          }
+          return stop;
+        });
+        state.selectedShipment = {
+          ...state.selectedShipment,
+          stops: newStops,
+        };
       })
 
       .addCase(uploadProofThunk.rejected, (state, action) => {
@@ -142,5 +162,5 @@ const shipmentSlice = createSlice({
   },
 });
 
-export const shipmentActions = shipmentSlice.actions;
+export const { stopCompleted } = shipmentSlice.actions;
 export default shipmentSlice.reducer;

@@ -3,7 +3,7 @@ import React, { createContext, useCallback, useContext, useRef, useState } from 
 import { StyleSheet, Text, View } from 'react-native';
 import { useDispatch } from 'react-redux';
 import ShipmentRequestNotification from '../components/common/ShipmentRequestNotification';
-import { shipmentActions } from '../hooks/useSelectorShipment';
+import { stopCompleted } from '../hooks/useSelectorShipment';
 import { addRequest, removeRequest } from '../hooks/useShipmentRequestSlice';
 import { useWebSocket } from '../hooks/useSocket';
 import { AppDispatch } from '../store/store';
@@ -45,11 +45,15 @@ const SocketConnectionManager = ({
 
   const handleMessage = useCallback(
     (data: any) => {
-      if (data && data.event) {
+      const eventType = data.event || data.type;
+      if (eventType) {
         switch (data.event) {
+          case 'pickup_confirmed':
           case 'delivery_confirmed':
-            console.log('Received delivery_confirmed event:', data.payload);
-            dispatch(shipmentActions.stopCompleted(data.payload));
+            const { shipmentID, facilityID } = data.payload || {};
+            if (shipmentID && facilityID) {
+              dispatch(stopCompleted({ shipmentID, facilityID }));
+            }
             break;
           case 'new_transport_bid':
             dispatch(addRequest(data.bid));
