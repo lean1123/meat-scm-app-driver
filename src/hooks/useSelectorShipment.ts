@@ -1,5 +1,10 @@
 import { createAsyncThunk, createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { getShipmentInfo, uploadDeliveryProof, uploadPickupProof } from '../api/driverApi';
+import {
+  getShipmentInfo,
+  startDelivery,
+  uploadDeliveryProof,
+  uploadPickupProof,
+} from '../api/driverApi';
 import { RootState } from '../store/store';
 import { ShipmentResponse, ShipmentStatus, TimelineEvent } from '../types/shipment';
 
@@ -73,6 +78,19 @@ export const uploadProofThunk = createAsyncThunk(
   },
 );
 
+export const startDeliveryThunk = createAsyncThunk(
+  'shipment/startDelivery',
+  async (shipmentID: string, { rejectWithValue }) => {
+    try {
+      await startDelivery(shipmentID);
+      return shipmentID;
+    } catch (error: any) {
+      console.error('Error starting delivery:', error);
+      return rejectWithValue(error.response?.data?.message || 'Cannot start delivery');
+    }
+  },
+);
+
 export const makeSelectStopByFacility = (facilityID: string) =>
   createSelector(
     (state: RootState) => state.selectedShipment?.selectedShipment?.stops || [],
@@ -85,8 +103,11 @@ export const makeSelectStepByFacility = (facilityID: string) =>
     const pendingDelivery = stop?.action === 'DELIVERY' && stop?.status === ShipmentStatus.PENDING;
     const hasDelivered = stop?.action === 'DELIVERY' && stop?.status === ShipmentStatus.UPLOADING;
     const hasPickuped = stop?.action === 'PICKUP' && stop?.status === ShipmentStatus.UPLOADING;
+    const completedPickup = stop?.action === 'PICKUP' && stop?.status === ShipmentStatus.COMPLETED;
+
     if (pendingPickup) return 'waiting_pickup';
     if (pendingDelivery) return 'waiting_delivery';
+    if (completedPickup) return 'ready_to_start_delivery';
     if (hasPickuped) return 'completed_pickup';
     if (hasDelivered) return 'completed_delivery';
     return 'waiting_pickup';
@@ -110,6 +131,11 @@ const shipmentSlice = createSlice({
           ...state.selectedShipment,
           stops: newStops,
         };
+      }
+    },
+    shipmentCompleted: (state) => {
+      if (state.selectedShipment) {
+        state.selectedShipment.status = ShipmentStatus.COMPLETED;
       }
     },
   },
@@ -158,6 +184,15 @@ const shipmentSlice = createSlice({
       .addCase(uploadProofThunk.rejected, (state, action) => {
         state.uploadStatus = 'failed';
         state.uploadError = action.payload as string;
+      })
+      .addCase(startDeliveryThunk.fulfilled, (state, action) => {
+        const shipmentID = action.payload;
+        if (state.selectedShipment && state.selectedShipment.shipmentID === shipmentID) {
+          state.selectedShipment.status = ShipmentStatus.IN_TRANSIT;
+        }
+      })
+      .addCase(startDeliveryThunk.rejected, (state, action) => {
+        console.error('Failed to start delivery:', action.payload);
       });
   },
 });

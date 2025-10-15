@@ -1,4 +1,5 @@
 import { getShipmentByDriverId } from '@/src/api/driverApi';
+import { useAuth } from '@/src/context/AuthContext';
 import { ShipmentResponse } from '@/src/types/shipment';
 import { useEffect, useState } from 'react';
 import { FlatList, Image, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
@@ -8,11 +9,12 @@ import TripItem from '../../components/confirmation/TripItem';
 export default function HomeScreen() {
   const [tab, setTab] = useState('Đang cần giao');
   const [shipments, setShipments] = useState<ShipmentResponse[]>([]);
+  const { userID } = useAuth();
 
   useEffect(() => {
     const fetchShipmentsByDriverId = async () => {
       try {
-        const res = await getShipmentByDriverId('driver-7fcc3acd');
+        const res = await getShipmentByDriverId(userID || '');
         setShipments(res);
       } catch (error) {
         console.error('Error fetching shipments:', error);

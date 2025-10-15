@@ -1,10 +1,11 @@
-import { RootState } from '@/src/store/store';
+import { makeSelectStepByFacility, startDeliveryThunk } from '@/src/hooks/useSelectorShipment';
+import { AppDispatch, RootState } from '@/src/store/store';
 import { ShipmentStatus, ShipmentStop } from '@/src/types/shipment';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import React, { useCallback, useRef, useState } from 'react';
-import { Text, View } from 'react-native';
-import { useSelector } from 'react-redux';
+import { Alert, Text, TouchableOpacity, View } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 import UploadImageComponent from '../UploadImage';
 import DeliveryActions from './DeliveryAction';
 
@@ -17,11 +18,19 @@ interface DeliveryStopProps {
 }
 
 export default function DeliveryStop({ stop }: DeliveryStopProps) {
-  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const [uploadStep, setUploadStep] = useState<'pickup' | 'delivery' | null>(null);
 
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const dispatch = useDispatch<AppDispatch>();
+
   const { selectedShipment } = useSelector((state: RootState) => state.selectedShipment);
+  const step = useSelector(makeSelectStepByFacility(stop.facilityID));
+
   const shipmentID = selectedShipment?.shipmentID || '';
+  const shipmentStatus = selectedShipment?.status || '';
+
+  const isIntransited =
+    shipmentStatus === ShipmentStatus.IN_TRANSIT || shipmentStatus === ShipmentStatus.COMPLETED;
 
   const handlePresentModalPress = useCallback((step: 'pickup' | 'delivery') => {
     setUploadStep(step);
@@ -30,6 +39,11 @@ export default function DeliveryStop({ stop }: DeliveryStopProps) {
 
   const handleImagesUploaded = () => {
     bottomSheetModalRef.current?.close();
+  };
+
+  const handleStartDelivery = () => {
+    dispatch(startDeliveryThunk(shipmentID));
+    Alert.alert('Thành công', 'Bạn đã bắt đầu giao hàng.', [{ text: 'OK' }]);
   };
 
   return (
@@ -60,7 +74,24 @@ export default function DeliveryStop({ stop }: DeliveryStopProps) {
           item={stop?.items[0]}
           action={stop.action}
           onOpenUpload={handlePresentModalPress}
+          isStartDeliverying={isIntransited}
         />
+      )}
+
+      {step === 'ready_to_start_delivery' && (
+        <>
+          {isIntransited ? (
+            <Text className="text-green-600 font-bold text-start my-2">Đã bắt đầu giao hàng</Text>
+          ) : (
+            <TouchableOpacity
+              className={`${!isIntransited ? 'bg-green-500' : 'bg-green-400'} rounded-lg p-3 items-center`}
+              onPress={handleStartDelivery}
+              disabled={isIntransited}
+            >
+              <Text className="text-white font-bold text-sm">Bắt đầu giao hàng</Text>
+            </TouchableOpacity>
+          )}
+        </>
       )}
 
       <BottomSheetModal ref={bottomSheetModalRef} snapPoints={['60%']}>

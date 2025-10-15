@@ -11,12 +11,14 @@ const DeliveryActions = React.memo(function DeliveryActions({
   item,
   action,
   onOpenUpload,
+  isStartDeliverying,
 }: {
   facilityID: string;
   shipmentID: string;
   item: ShipmentItem;
   action: 'PICKUP' | 'DELIVERY';
   onOpenUpload: (step: 'pickup' | 'delivery') => void;
+  isStartDeliverying: boolean;
 }) {
   const step = useSelector(makeSelectStepByFacility(facilityID));
 
@@ -63,7 +65,8 @@ const DeliveryActions = React.memo(function DeliveryActions({
         <>
           <Text className="text-sm text-gray-600 mb-2">Bước 1: Chụp ảnh lúc giao hàng.</Text>
           <TouchableOpacity
-            className="bg-blue-500 rounded-lg p-3 items-center"
+            className={`${!isStartDeliverying ? 'bg-blue-400' : 'bg-blue-500'}  rounded-lg p-3 items-center`}
+            disabled={!isStartDeliverying}
             onPress={() => onOpenUpload('delivery')}
           >
             <Text className="text-white font-bold text-sm">Chụp ảnh khi giao</Text>

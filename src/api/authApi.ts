@@ -10,4 +10,13 @@ export const AuthApi = {
       throw error;
     }
   },
+  profile: async () => {
+    try {
+      const response = await axiosClient.get('profile/me');
+      return response.data;
+    } catch (error) {
+      console.error('Error while fetching profile:', error);
+      throw error;
+    }
+  },
 };
