@@ -1,28 +1,43 @@
 import { getShipmentByDriverId } from '@/src/api/driverApi';
 import { useAuth } from '@/src/context/AuthContext';
 import { ShipmentResponse } from '@/src/types/shipment';
-import { useEffect, useState } from 'react';
-import { FlatList, Image, SafeAreaView, Text, TouchableOpacity, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  FlatList,
+  Image,
+  RefreshControl,
+  SafeAreaView,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import '../../../global.css';
 import TripItem from '../../components/confirmation/TripItem';
 
 export default function HomeScreen() {
   const [tab, setTab] = useState('Đang cần giao');
   const [shipments, setShipments] = useState<ShipmentResponse[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
   const { userID } = useAuth();
 
-  useEffect(() => {
-    const fetchShipmentsByDriverId = async () => {
-      try {
-        const res = await getShipmentByDriverId(userID || '');
-        setShipments(res);
-      } catch (error) {
-        console.error('Error fetching shipments:', error);
-      }
-    };
+  const fetchShipmentsByDriverId = useCallback(async () => {
+    try {
+      const res = await getShipmentByDriverId(userID || '');
+      setShipments(res);
+    } catch (error) {
+      console.error('Error fetching shipments:', error);
+    }
+  }, [userID]);
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchShipmentsByDriverId();
+    setRefreshing(false);
+  }, [fetchShipmentsByDriverId]);
+
+  useEffect(() => {
     fetchShipmentsByDriverId();
-  }, []);
+  }, [fetchShipmentsByDriverId]);
 
   return (
     <SafeAreaView className="flex-1 items-center bg-white">
@@ -51,6 +66,16 @@ export default function HomeScreen() {
         contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         className="w-full"
         renderItem={({ item, index }) => <TripItem item={item} index={index} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#f97316']} // Màu cam matching với header
+            tintColor="#f97316"
+            title="Đang tải..."
+            titleColor="#666"
+          />
+        }
       />
     </SafeAreaView>
   );
