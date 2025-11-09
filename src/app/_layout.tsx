@@ -36,7 +36,7 @@ const InitialLayout = () => {
     } else {
       const inAuthRoutes = segments.includes('login') || segments.includes('register');
       if (inAuthRoutes) {
-        router.replace('/(tabs)');
+        router.replace('/(tabs)/index');
       }
     }
   }, [userToken, segments, isLoading, loaded, router]);

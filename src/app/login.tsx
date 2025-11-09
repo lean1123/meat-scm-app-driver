@@ -24,18 +24,23 @@ const LoginScreen = () => {
   const [email, setEmail] = useState('driver.a@carrier.com');
   const [password, setPassword] = useState('123456');
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ thông tin.');
       return;
     }
-    dispatch(loginUser({ email, password }));
+    await dispatch(loginUser({ email, password }));
   };
 
   useEffect(() => {
-    if (status === 'succeeded' && token) {
-      login(token);
-    }
+    const handleSuccess = async () => {
+      if (status === 'succeeded' && token) {
+        await login(token);
+      }
+    };
+
+    handleSuccess();
+
     if (status === 'failed' && error) {
       Alert.alert('Đăng nhập thất bại', error);
     }

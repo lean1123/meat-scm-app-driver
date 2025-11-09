@@ -37,8 +37,22 @@ export const loginUser = createAsyncThunk(
   },
 );
 
+export const fetchUserProfile = createAsyncThunk(
+  'auth/fetchUserProfile',
+  async (_, { rejectWithValue }) => {
+    try {
+      const profile = await AuthApi.profile();
+      const { fabricEnrollmentID, name } = profile;
+      await SecureStore.setItemAsync('userID', fabricEnrollmentID);
+      await SecureStore.setItemAsync('username', name);
+      return profile;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Fetch profile failed');
+    }
+  },
+);
+
 export const logout = () => async (dispatch: AppDispatch) => {
-  await SecureStore.deleteItemAsync('userToken');
   dispatch(clearAuth());
 };
 
@@ -69,6 +83,18 @@ const authSlice = createSlice({
         },
       )
       .addCase(loginUser.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload as string;
+      })
+      .addCase(fetchUserProfile.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
+      .addCase(fetchUserProfile.fulfilled, (state, action: PayloadAction<User>) => {
+        state.status = 'succeeded';
+        state.user = action.payload;
+      })
+      .addCase(fetchUserProfile.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload as string;
       });

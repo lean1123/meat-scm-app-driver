@@ -46,18 +46,12 @@ export default function TabLayout() {
         }}
       />
 
-      {/* <Tabs.Screen
-        name="qrCode"
+      <Tabs.Screen
+        name="shipments"
         options={{
-          tabBarButton: () => (
-            <View style={styles.qrContainer}>
-              <TouchableOpacity style={styles.qrButton} onPress={() => router.push('/qrCode')}>
-                <Ionicons name="qr-code" size={28} color="white" />
-              </TouchableOpacity>
-            </View>
-          ),
+          tabBarIcon: ({ size }) => <Feather name="truck" size={size} color="white" />,
         }}
-      /> */}
+      />
 
       <Tabs.Screen
         name="request"

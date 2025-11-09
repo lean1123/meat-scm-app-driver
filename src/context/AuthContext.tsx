@@ -1,38 +1,34 @@
 import * as SecureStore from 'expo-secure-store';
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { AuthApi } from '../api/authApi';
 import { setupResponseInterceptor } from '../api/axiosClient';
-import { logout } from '../hooks/authSlice';
+import { fetchUserProfile, logout } from '../hooks/authSlice';
 import { AppDispatch } from '../store/store';
 
 interface AuthContextType {
-  login: (token: string) => void;
-  handleLogoutFromContext: () => void;
+  login: (token: string) => Promise<void>;
+  handleLogoutFromContext: () => Promise<void>;
+  handleLogoutFromInvalidToken: () => Promise<void>;
   userToken: string | null;
-  userID: string | null;
   isLoading: boolean;
-  handleLogoutFromInvalidToken: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [userToken, setUserToken] = useState<string | null>(null);
-  const [userID, setUserID] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const dispatch = useDispatch<AppDispatch>();
 
+  // ✅ Khi app khởi động, đọc token từ SecureStore
   useEffect(() => {
     const loadToken = async () => {
       try {
         const token = await SecureStore.getItemAsync('userToken');
-
-        setUserToken(token);
-
         if (token) {
-          const id = await AuthApi.profile();
-          setUserID(id.fabricEnrollmentID);
+          setUserToken(token);
+          // Fetch lại profile nếu có token
+          await dispatch(fetchUserProfile());
         }
       } catch (e) {
         console.error('Failed to load token', e);
@@ -41,23 +37,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     };
     loadToken();
-  }, []);
+  }, [dispatch]);
 
+  // ✅ Hàm login: lưu token, fetch profile, đảm bảo hoàn tất
   const login = async (token: string) => {
-    setUserToken(token);
-    await SecureStore.setItemAsync('userToken', token);
+    try {
+      setIsLoading(true);
+      setUserToken(token);
+      await SecureStore.setItemAsync('userToken', token);
+      await dispatch(fetchUserProfile());
+    } catch (err) {
+      console.error('Error during login:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  // ✅ Logout khi người dùng bấm "Đăng xuất"
   const handleLogoutFromContext = async () => {
-    setUserToken(null);
-    await dispatch(logout());
+    try {
+      setUserToken(null);
+      await dispatch(logout());
+      await SecureStore.deleteItemAsync('userToken');
+      await SecureStore.deleteItemAsync('userID');
+      await SecureStore.deleteItemAsync('username');
+    } catch (err) {
+      console.error('Error during logout:', err);
+    }
   };
 
+  // ✅ Logout khi token hết hạn hoặc API 401
   const handleLogoutFromInvalidToken = async () => {
-    setUserToken(null);
-    await SecureStore.deleteItemAsync('userToken');
+    try {
+      setUserToken(null);
+      await SecureStore.deleteItemAsync('userToken');
+    } catch (err) {
+      console.error('Error handling invalid token:', err);
+    }
   };
 
+  // ✅ Cài interceptor để tự logout khi gặp lỗi token
   useEffect(() => {
     setupResponseInterceptor(handleLogoutFromInvalidToken);
   }, []);
@@ -67,10 +86,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       value={{
         login,
         handleLogoutFromContext,
-        userToken,
-        userID,
-        isLoading,
         handleLogoutFromInvalidToken,
+        userToken,
+        isLoading,
       }}
     >
       {children}
@@ -78,9 +96,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+// ✅ Custom hook
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
