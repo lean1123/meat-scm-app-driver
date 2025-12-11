@@ -17,17 +17,20 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.lean1123.meatscmappuser"
+      "package": "com.lean1123.meatscmappuser",
+      "permissions": ["android.permission.CAMERA"]
     },
     "web": {
       "bundler": "metro",
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
-    "plugins": [
-      "expo-secure-store",
-      "expo-barcode-scanner"
-    ]
+    "plugins": ["expo-secure-store", "expo-router"],
+    "extra": {
+      "eas": {
+        "projectId": "ebeec7a2-1ee8-45fb-bc32-e5d9a4f4f147"
+      }
+    }
   },
   "plugins": [
     "expo-router",
