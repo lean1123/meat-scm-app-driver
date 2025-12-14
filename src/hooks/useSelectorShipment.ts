@@ -197,5 +197,5 @@ const shipmentSlice = createSlice({
   },
 });
 
-export const { stopCompleted } = shipmentSlice.actions;
+export const { stopCompleted, shipmentCompleted } = shipmentSlice.actions;
 export default shipmentSlice.reducer;

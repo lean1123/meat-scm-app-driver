@@ -30,7 +30,7 @@ export default function ShipmentsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [shipments, setShipments] = useState<ShipmentResponse[]>([]);
   const [query, setQuery] = useState('');
-  const [activeStatus, setActiveStatus] = useState<StatusKey>('IN_TRANSIT');
+  const [activeStatus, setActiveStatus] = useState<StatusKey>('PENDING');
   const [userID, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -81,7 +81,15 @@ export default function ShipmentsScreen() {
     const byQuery = query.trim()
       ? byStatus.filter((s) => s.shipmentID.toLowerCase().includes(query.trim().toLowerCase()))
       : byStatus;
-    return byQuery;
+    // Sort by createDate descending (newest first). Fallbacks cover API variants.
+    const sorted = [...byQuery].sort((a, b) => {
+      const aDate = (a as any).createDate ?? (a as any).createdAt ?? (a as any).createAt ?? '';
+      const bDate = (b as any).createDate ?? (b as any).createdAt ?? (b as any).createAt ?? '';
+      const aTime = aDate ? new Date(aDate).getTime() : 0;
+      const bTime = bDate ? new Date(bDate).getTime() : 0;
+      return bTime - aTime;
+    });
+    return sorted;
   }, [shipments, activeStatus, query]);
 
   // If the user is not logged in, show a login prompt instead of the list

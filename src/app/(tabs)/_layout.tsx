@@ -56,7 +56,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="request"
         options={{
-          title: 'Yêu cầu',
+          title: 'Yeu Cau Van Chuyen',
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <TabBarIconWithBadge name="bell" color={'#fff'} size={size} />

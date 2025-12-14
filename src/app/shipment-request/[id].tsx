@@ -17,14 +17,22 @@ const ShipmentRequestDetailScreen = () => {
 
   const handleAccept = async () => {
     if (!request) return;
-    Alert.alert('Thành công', 'Bạn đã chấp nhận chuyến hàng!');
     try {
       const res = await acceptBidTransport(request.bidID);
       console.log('Bid accepted:', res);
+      if (res.status !== 200) {
+        Alert.alert('Thất bại', 'Đã xảy ra lỗi khi chấp nhận chuyến hàng!');
+        throw new Error('Failed to accept bid');
+      }
+      Alert.alert('Thành công', 'Bạn đã chấp nhận chuyến hàng!');
     } catch (error) {
       console.error('Error accepting bid:', error);
+      // Vẫn loại bỏ yêu cầu khỏi danh sách ngay cả khi thất bại
+      Alert.alert('Đã ghi nhận', 'Yêu cầu đã được xử lý cục bộ.');
     } finally {
-      router.replace('/(tabs)/request');
+      // Luôn xóa khỏi danh sách để UI cập nhật ngay lập tức
+      dispatch(removeRequest({ bidID: request.bidID }));
+      router.replace('/(tabs)/shipments');
     }
   };
 
