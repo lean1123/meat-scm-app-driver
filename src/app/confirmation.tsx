@@ -38,13 +38,6 @@ export default function ConfirmationScreen() {
             deliveries={selectedShipment?.stops}
             timeline={selectedShipment?.timeline || []}
           />
-
-          {/* <TouchableOpacity
-            className="w-full bg-orange-500 p-5 rounded-2xl mt-4"
-            onPress={handleConfirm}
-          >
-            <Text className="text-white font-bold text-center text-base">Xác nhận đơn</Text>
-          </TouchableOpacity> */}
         </ScrollView>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>

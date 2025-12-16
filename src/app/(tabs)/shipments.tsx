@@ -75,20 +75,32 @@ export default function ShipmentsScreen() {
   }, [fetchShipments]);
 
   const filtered = useMemo(() => {
+    // 1. Lọc theo trạng thái (Tab)
     const byStatus = shipments.filter(
       (s) => s.status === ShipmentStatus[activeStatus as keyof typeof ShipmentStatus],
     );
+
+    // 2. Lọc theo từ khóa tìm kiếm (Search)
     const byQuery = query.trim()
       ? byStatus.filter((s) => s.shipmentID.toLowerCase().includes(query.trim().toLowerCase()))
       : byStatus;
-    // Sort by createDate descending (newest first). Fallbacks cover API variants.
+
+    // 3. Sắp xếp theo history[0].timestamp
     const sorted = [...byQuery].sort((a, b) => {
-      const aDate = (a as any).createDate ?? (a as any).createdAt ?? (a as any).createAt ?? '';
-      const bDate = (b as any).createDate ?? (b as any).createdAt ?? (b as any).createAt ?? '';
-      const aTime = aDate ? new Date(aDate).getTime() : 0;
-      const bTime = bDate ? new Date(bDate).getTime() : 0;
+      // Lấy timestamp từ phần tử đầu tiên trong mảng history
+      // Ép kiểu (as any) để tránh lỗi TypeScript nếu type ShipmentResponse chưa cập nhật field history
+      const aHistoryTimestamp = (a as any).history?.[0]?.timestamp;
+      const bHistoryTimestamp = (b as any).history?.[0]?.timestamp;
+
+      // Chuyển đổi sang Time (number) để so sánh
+      // Nếu không có timestamp thì gán bằng 0 để đẩy xuống cuối
+      const aTime = aHistoryTimestamp ? new Date(aHistoryTimestamp).getTime() : 0;
+      const bTime = bHistoryTimestamp ? new Date(bHistoryTimestamp).getTime() : 0;
+
+      // Trừ b - a để sắp xếp giảm dần (Mới nhất lên đầu)
       return bTime - aTime;
     });
+
     return sorted;
   }, [shipments, activeStatus, query]);
 

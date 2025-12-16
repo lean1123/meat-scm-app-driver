@@ -3,7 +3,7 @@ import React, { createContext, useCallback, useContext, useRef, useState } from 
 import { StyleSheet, Text, View } from 'react-native';
 import { useDispatch } from 'react-redux';
 import ShipmentRequestNotification from '../components/common/ShipmentRequestNotification';
-import { shipmentCompleted, stopCompleted } from '../hooks/useSelectorShipment';
+import { fetchShipmentById, shipmentCompleted, stopCompleted } from '../hooks/useSelectorShipment';
 import { addRequest, removeRequest } from '../hooks/useShipmentRequestSlice';
 import { useWebSocket } from '../hooks/useSocket';
 import { AppDispatch } from '../store/store';
@@ -45,35 +45,52 @@ const SocketConnectionManager = ({
 
   const handleMessage = useCallback(
     (data: any) => {
-      const eventType = data.event || data.type;
-      if (eventType) {
-        switch (data.event) {
-          case 'pickup_confirmed': {
-            const { shipmentID, facilityID } = data.payload || {};
-            if (shipmentID && facilityID) {
-              dispatch(stopCompleted({ shipmentID, facilityID }));
-            }
-            break;
-          }
+      const eventType = data?.event || data?.type;
+      if (!eventType) return;
 
-          case 'delivery_confirmed': {
-            const { shipmentID, facilityID } = data.payload || {};
-            if (shipmentID && facilityID) {
-              dispatch(stopCompleted({ shipmentID, facilityID }));
-            }
-            dispatch(shipmentCompleted(data.payload));
-            break;
+      switch (eventType) {
+        // QR confirmations (support multiple naming variants)
+        case 'pickup_confirmed':
+        case 'pickup_qr_confirmed': {
+          const { shipmentID, facilityID } = data.payload || {};
+          if (shipmentID && facilityID) {
+            dispatch(stopCompleted({ shipmentID, facilityID }));
           }
-          case 'new_transport_bid':
-            dispatch(addRequest(data.bid));
-            break;
-
-          case 'bid_confirmed_by_other':
-            dispatch(removeRequest({ bidID: data.bidID }));
-            break;
-          default:
-            break;
+          break;
         }
+        case 'delivery_confirmed':
+        case 'delivery_qr_confirmed': {
+          const { shipmentID, facilityID } = data.payload || {};
+          if (shipmentID && facilityID) {
+            dispatch(stopCompleted({ shipmentID, facilityID }));
+          }
+          if (data.payload?.shipmentID) {
+            dispatch(shipmentCompleted(data.payload));
+          }
+          break;
+        }
+
+        // Shipment change broadcast: refetch to stay consistent
+        case 'shipment_updated': {
+          const shipmentID = data.payload?.shipmentID || data.shipmentID;
+          if (shipmentID) dispatch(fetchShipmentById(shipmentID));
+          break;
+        }
+
+        // Transport bid events
+        case 'new_transport_bid': {
+          if (data.bid) dispatch(addRequest(data.bid));
+          break;
+        }
+        case 'bid_confirmed_by_other':
+        case 'bid_expired': {
+          const bidID = data.bidID || data.payload?.bidID;
+          if (bidID) dispatch(removeRequest({ bidID }));
+          break;
+        }
+
+        default:
+          break;
       }
     },
     [dispatch],

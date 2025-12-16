@@ -15,11 +15,26 @@ const ShipmentRequestDetailScreen = () => {
     state.shipmentRequest.requests.find((req) => req.bidID === id),
   );
 
+  const status = (request as any)?.status as string | undefined;
+  const expiresAt = (request as any)?.expiresAt as string | undefined;
+  // Ưu tiên kiểm tra theo status để tránh lỗi timezone; chỉ khi status không có thì fallback theo thời gian
+  const isExpiredByStatus = status === 'EXPIRED';
+  const isExpiredByTime = expiresAt ? new Date(expiresAt).getTime() <= Date.now() : false;
+  const isExpired = isExpiredByStatus || isExpiredByTime;
+
+  const guardIfExpired = () => {
+    if (isExpired) {
+      Alert.alert('Đã hết hạn', 'Yêu cầu này đã hết hạn, không thể xử lý.');
+      return true;
+    }
+    return false;
+  };
+
   const handleAccept = async () => {
     if (!request) return;
+    if (guardIfExpired()) return;
     try {
       const res = await acceptBidTransport(request.bidID);
-      console.log('Bid accepted:', res);
       if (res.status !== 200) {
         Alert.alert('Thất bại', 'Đã xảy ra lỗi khi chấp nhận chuyến hàng!');
         throw new Error('Failed to accept bid');
@@ -38,6 +53,7 @@ const ShipmentRequestDetailScreen = () => {
 
   const handleReject = () => {
     if (!request) return;
+    if (guardIfExpired()) return;
     setTimeout(() => {
       Alert.alert('Thông báo', 'Bạn đã từ chối chuyến hàng.');
       dispatch(removeRequest({ bidID: request.bidID }));
@@ -61,16 +77,26 @@ const ShipmentRequestDetailScreen = () => {
           <Text>Loại: {request.shipmentType}</Text>
           <Text>Điểm đi: {request.stops[0].facilityID}</Text>
           <Text>Điểm đến: {request.stops[request.stops.length - 1].facilityID}</Text>
+          {expiresAt && (
+            <Text className={`mt-2 ${isExpired ? 'text-red-600' : 'text-gray-600'}`}>
+              {isExpired ? 'Đã hết hạn' : `Hết hạn: ${new Date(expiresAt).toLocaleString()}`}
+            </Text>
+          )}
         </View>
       </ScrollView>
 
       <View className="flex-row p-4 border-t border-gray-200 bg-white">
-        <TouchableOpacity onPress={handleReject} className="flex-1 bg-red-500 p-4 rounded-lg mr-2">
+        <TouchableOpacity
+          onPress={handleReject}
+          disabled={isExpired}
+          className={`flex-1 p-4 rounded-lg mr-2 ${isExpired ? 'bg-red-300' : 'bg-red-500'}`}
+        >
           <Text className="text-white font-bold text-center">Từ chối</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={handleAccept}
-          className="flex-1 bg-green-500 p-4 rounded-lg ml-2"
+          disabled={isExpired}
+          className={`flex-1 p-4 rounded-lg ml-2 ${isExpired ? 'bg-green-300' : 'bg-green-500'}`}
         >
           <Text className="text-white font-bold text-center">Chấp nhận</Text>
         </TouchableOpacity>
